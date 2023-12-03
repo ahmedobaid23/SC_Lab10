@@ -21,7 +21,20 @@ import java.util.regex.Pattern;
  */
 public class Main {
     
+    // Prefix for the differentiate command
+    private static final String DIFFERENTIATE_PREFIX = "!d/d";
+    // Regular expression for a variable
+    private static final String VARIABLE = "[A-Za-z]+";
+    // Regular expression for the differentiate command
+    private static final String DIFFERENTIATE = DIFFERENTIATE_PREFIX + "(" + VARIABLE + ") *";
     
+    // Prefix for the simplify command
+    private static final String SIMPLIFY_PREFIX = "!simplify";
+    // Regular expression for an assignment (variable = value)
+    private static final String ASSIGNMENT = "(" + VARIABLE + ") *= *([^ ]+)";
+    // Regular expression for the simplify command
+    private static final String SIMPLIFY = SIMPLIFY_PREFIX + "( +" + ASSIGNMENT + ")* *";    
+
     /**
      * Read expression and command inputs from the console and output results.
      * An empty input terminates the program.
@@ -43,15 +56,20 @@ public class Main {
             try {
                 final String output;
                 
+                // Differentiate command
                 if (input.startsWith(DIFFERENTIATE_PREFIX)) {
                     final String variable = parseDifferentiate(input);
                     output = Commands.differentiate(currentExpression.get(), variable);
                     currentExpression = Optional.of(output);
-                } else if (input.startsWith(SIMPLIFY_PREFIX)) {
+                } 
+                // Simplify command
+                else if (input.startsWith(SIMPLIFY_PREFIX)) {
                     final Map<String,Double> environment = parseSimpify(input);
                     output = Commands.simplify(currentExpression.get(), environment);
                     // ... but don't change currentExpression
-                } else {
+                } 
+                // Regular expression for a generic expression
+                else {
                     final Expression expression = Expression.parse(input);
                     output = expression.toString();
                     currentExpression = Optional.of(output);
@@ -67,10 +85,12 @@ public class Main {
         }
     }
  
-    private static final String DIFFERENTIATE_PREFIX = "!d/d";
-    private static final String VARIABLE = "[A-Za-z]+";
-    private static final String DIFFERENTIATE = DIFFERENTIATE_PREFIX + "(" + VARIABLE + ") *";
-
+    /**
+     * Parse the differentiate command to extract the variable.
+     * @param input the input string containing the differentiate command
+     * @return the variable to differentiate with respect to
+     * @throws CommandSyntaxException if the command syntax is incorrect
+     */
     private static String parseDifferentiate(final String input) {
         final Matcher commandMatcher = Pattern.compile(DIFFERENTIATE).matcher(input);
         if (!commandMatcher.matches()) {
@@ -81,10 +101,12 @@ public class Main {
         return variable;
     }
     
-    private static final String SIMPLIFY_PREFIX = "!simplify";
-    private static final String ASSIGNMENT = "(" + VARIABLE + ") *= *([^ ]+)";
-    private static final String SIMPLIFY = SIMPLIFY_PREFIX + "( +" + ASSIGNMENT + ")* *";    
-
+    /**
+     * Parse the simplify command to extract the variable-value pairs.
+     * @param input the input string containing the simplify command
+     * @return a map of variable-value pairs
+     * @throws CommandSyntaxException if the command syntax is incorrect
+     */
     private static Map<String,Double> parseSimpify(final String input) {
         final Matcher commandMatcher = Pattern.compile(SIMPLIFY).matcher(input);
         if (!commandMatcher.matches()) {
@@ -104,6 +126,9 @@ public class Main {
         return environment;
     }
     
+    /**
+     * Custom exception class for command syntax errors.
+     */
     public static class CommandSyntaxException extends RuntimeException {
         private static final long serialVersionUID = 1;
         public CommandSyntaxException(String message) {
