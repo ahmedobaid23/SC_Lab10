@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
  * Console interface to the expression system.
  * 
  * <p>PS3 instructions: you are free to change this user interface class.
+ * Looks good to me guys, good work!
  */
 public class Main {
     
